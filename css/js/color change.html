@@ -6,40 +6,36 @@
     <title>Document</title>
     <style>
         .red{
-            color: red;
-        }
+            border-color: red;
+            border-width: 2px;
+                    }
         .blue{
-            color: blue;
-        }
-        .redborder {
-            border: 2px solid red;
-        }
-        .blueborder {
-            border: 2px solid blue;
-        }
+            border-color: blue;
+            border-width: 2px;
+           }
     </style>
-    <script></script>
-
 </head>
 <body>
-    <h1 id="h1_id">this is h1</h1>
-    <input type="text" id="textbox">
-    <button id="red_id">Red</button>
-    <button id="blue_id">Blue</button>
+    <input id="in" type="text" placeholder="Enter Your Name..">
+    <button id = "b1">CHECK</button>
     <script>
-        var classH1 =document.querySelector("#h1_id").classList
-        chgRed =()=>{
-        classH1.add("red")
-        classH1.remove("blue")
-    }
-    chgBlue =()=>{
-        classH1.add("blue")
-        classH1.remove("red")
-   
-    }
-    document.querySelector("#red_id").addEventListener("click",chgRed);
-    document.querySelector("#blue_id").addEventListener("click",chgBlue);
+        document.getElementById('b1').onclick = function(){
+            var a = document.getElementById("in").value;
+            if(a == ""){
+                chred();
+            }else{
+                chblue();
+            }
+        };
+        chred=()=>{
+            document.getElementById("in").classList.add("red");
+            document.getElementById("in").classList.remove("blue");
+            }
+        chblue=()=>{
+            document.getElementById("in").classList.add("blue");
+            document.getElementById("in").classList.remove("red");
+            }
+        
     </script>
-    
 </body>
 </html>
