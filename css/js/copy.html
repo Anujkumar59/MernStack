@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .red {
+            color: red;
+        }
+        .blue {
+            color: blue;
+        }
+        .red-border {
+            border: 2px solid red;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="h1_id">This is h1</h1>
+    <input type="text" id="textbox" placeholder="Enter text here">
+    <button id="red_id">Red</button>
+    <button id="blue_id">Blue</button>
+    
+    <script>
+        var classH1 = document.querySelector("#h1_id").classList;
+        var textbox = document.querySelector("#textbox");
+
+        chgRed = () => {
+            classH1.add("red");
+            classH1.remove("blue");
+            checkTextbox();
+        }
+
+        chgBlue = () => {
+            classH1.add("blue");
+            classH1.remove("red");
+            checkTextbox();
+        }
+
+        checkTextbox = () => {
+            if (textbox.value.trim() === "") {
+                textbox.classList.add("red-border");
+            } else {
+                textbox.classList.remove("red-border");
+            }
+        }
+
+        document.querySelector("#red_id").addEventListener("click", chgRed);
+        document.querySelector("#blue_id").addEventListener("click", chgBlue);
+    </script>
+    
+</body>
+</html>

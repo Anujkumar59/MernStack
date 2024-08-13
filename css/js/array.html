@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+   
+    <script>
+        let name = ["asd","ffsf","fwefw","dfef","frefef",15,5];
+        console.log(name[20]);
+        for(let index in name){
+            if(name[index].startsWith("w")){
+            console.log(index,name[index]);
+        }
+    }
+    
+
+    </script>
+        <style>
+            .blue{
+                color: blue;
+            }
+            .red{
+                color: red;
+            }
+        </style>
+</head>
+
+<body>
+    <h1 id="h1_id">this is h1</h1>
+    <button id="red_id">Red</button>
+    <button id="blue_id">Blue</button>
+
+<script>
+    
+    chgRed =()=>{
+        document.querySelector("h1_id").classList.add('red');
+    }
+    chgBlue =()=>{
+        document.querySelector("h1_id").classList.add('blue');
+    }
+    document.querySelector("#red_id").addEventListener("click",chgRed);
+    document.querySelector("#blue_id").addEventListener("click",chgBlue);
+</script>
+    
+</body>
+</html> 

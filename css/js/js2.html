@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+   
+</head>
+<body>
+    <input type="text" id="input_id"/>
+    <h1 id="h1_id">hi this s heading</h1>
+    <h2 id="h1_id">Welcome to javascript</h2>
+    <button onclick="changeText()">click</button>
+</body>
+<script>
+    function changeText(){
+    let val = document.getElementById("input_id").value;
+    console.log(val);
+       document.getElementById("h1_id").innerHTML=val;
+}
+</script>
+</html>
