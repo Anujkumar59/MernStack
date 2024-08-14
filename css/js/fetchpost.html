@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="postapi()"></button>
+    <input type="text" id="name">
+    <input type="text" id="dept">
+    <script>
+    async function postapi(){
+        let name = document.getElementById("name").value;
+        let dept = document.getElementById("dept").value;
+        
+        let data = {
+            "name": name,
+            "job":dept
+        }
+       
+     let res = await fetch("https://reqres.in/api/users",{"method":"POST",body:JSON.stringify(data),headers:{"content-type":"application/json"}});
+     let json = await res.json();
+        console.log(json)
+        }
+    </script>
+</body>
+</html>

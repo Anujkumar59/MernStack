@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Login page</h1>
+    <input type="text" id="email">
+    <input type="text" id="password">
+    <button id="b1">click</button>
+    <script>
+        async function postapi(){
+            let email = document.getElementById("email").value
+            let password = document.getElementById("password").value
+            
+            let data = {
+                "email": email,
+                "password":password
+            }
+              
+     let res = await fetch("https://reqres.in/api/users",{"method":"POST",body:JSON.stringify(data),headers:{"content-type":"application/json"}});
+     let json = await res.json();
+        console.log(json)
+        }
+        re =document.getElementById("b1").addEventListener("click",postapi)
+        console.log(re)
+        </script>
+        
+</body>
+</html>
