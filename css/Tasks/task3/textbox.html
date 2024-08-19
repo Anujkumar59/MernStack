@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Push Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #000000;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 18px;
+            color: #000000;
+        }
+
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            border: 1px solid #d5d3da;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 15px;
+            color: rgb(255, 255, 255);
+            background-color: #3700ff;
+            border: none;
+            border-radius: 80px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1200b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Array push</h1>
+    <label for="inputBox">Enter a value:</label>
+    <input type="text" id="inputBox" placeholder="Enter the value">
+    <button id="pushButton">Push to Array</button>
+
+    <script>
+        const array = [];
+
+        document.getElementById('pushButton').addEventListener('click', function() {
+            const inputValue = document.getElementById('inputBox').value; 
+            if (inputValue) {
+                array.push(inputValue);
+                console.log(array);
+                document.getElementById('inputBox').value = '';
+            } else {
+                console.log("The text box is empty.");
+            }
+        });
+    </script>
+</body>
+</html>
