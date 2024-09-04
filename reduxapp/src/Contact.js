@@ -1,11 +1,8 @@
-import Header from "./Header";
-function Contact(){
+const Contact = () => {
     return(
-        <div>
-            <Header/>
-            <h1>This is Contact page</h1>
-        </div>
+        <div> This the Contact page</div> 
     )
-}
+    
+};
 
 export default Contact;
