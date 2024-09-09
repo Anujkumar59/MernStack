@@ -38,7 +38,13 @@ app.get("/listempbyname/:name",async(req,res)=>{
     let list = await db.collection('employee').find({name:name}).toArray();
     res.status(200).json(list)
 })
-
+app.delete("/deleteUserByName",async(req,res)=>{
+    let {name} = req.query;
+    await client.connect();
+    let db=client.db(ex)
+    await db.collection("employee").deleteOne({"name":name})
+    res.json({"msg":"user deleted"})
+})
 // Start the Express server
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
