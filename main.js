@@ -1,3 +1,4 @@
+var jwt = require('jsonwebtoken');
 var express = require('express');
     // It is used to create new instances of Object IDs that are used as unique identifiers for documents in a MongoDB database.
     /*  allows you to connect to a MongoDB database and perform operations such as inserting, updating, deleting, and querying
@@ -6,6 +7,14 @@ var express = require('express');
 
     var app = express();
     app.use(express.json());
+    app.use((req,res,next)=>{
+        let{token}= req.headers;
+        if(token == "" || token == undefined){
+            res.json({"msg":"pls send the token"})
+        }else{
+            next();
+        }
+    });
 
     /* The code const cors = require('cors'); app.use(cors()); is implementing Cross-Origin Resource
     Sharing (CORS) in the Express application. */
@@ -77,7 +86,7 @@ var express = require('express');
     })
 
     // for listing all Job details from mongoDB(Database)
-    app.get("/getjob", async (req, res) => {
+    app.get("/api/list_job", async (req, res) => {
         await client.connect();
         let db = client.db(ex);
         let list = await db.collection('jobs').find({}).toArray();
@@ -120,6 +129,20 @@ var express = require('express');
         await db.collection("jobs").deleteOne({ "name": name })
         res.json({ "msg": "user deleted" })
     })
+    app.post("/login", async (req,res)=>{
+        let{email,password}= req.body;
+        //add db connection details
+        let db = client.db(ex);
+        let loginRes = await db.collection("jobs").find({"email":email,"password":password}).toArray();
+        console.log(loginRes);
+
+        if(loginRes.length > 0){
+            var token = jwt.sign({'name':loginRes[0]['name']},' SECRET');
+            res.json({"msg":"u are correct","token":token});
+        }else{
+            res.json({"msg":"u are wrong"});
+        }
+    });
 
     app.delete('/delete_id', async (req, res) => {
         let { id } = req.body;
