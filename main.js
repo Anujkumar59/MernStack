@@ -1,163 +1,196 @@
 var jwt = require('jsonwebtoken');
 var express = require('express');
-    // It is used to create new instances of Object IDs that are used as unique identifiers for documents in a MongoDB database.
-    /*  allows you to connect to a MongoDB database and perform operations such as inserting, updating, deleting, and querying
-    documents in the database.is used to establish a connection to a MongoDB database hosted on MongoDB Atlas. */
-    const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb'); 
 
-    var app = express();
-    app.use(express.json());
-    app.use((req,res,next)=>{
-        let{token}= req.headers;
-        if(token == "" || token == undefined){
-            res.json({"msg":"pls send the token"})
-        }else{
-            next();
-        }
-    });
+var app = express();
+app.use(express.json());
 
-    /* The code const cors = require('cors'); app.use(cors()); is implementing Cross-Origin Resource
-    Sharing (CORS) in the Express application. */
-    const cors = require('cors');
-    app.use(cors());
+// Middleware for token validation for all `/api/` routes
+app.use('/api/', (req, res, next) => {
+    let { token } = req.headers;
+    if (!token) {
+        return res.status(401).json({ "msg": "Please send the token" });
+    }
 
-    // main database
-    const ex = "job_portal"
+    try {
+        jwt.verify(token, 'SECRET');
+        next();
+    } catch (err) {
+        return res.status(403).json({ "msg": "Invalid token" });
+    }
+});
 
-    // url of the database
-    const url = 'mongodb+srv://anuj123:jangiranuj2000@cluster0.qq2p4.mongodb.net/';
-    const client = new MongoClient(url);
+// Enable cross-origin requests (CORS)
+var cors = require("cors");
+const fileUpload = require('express-fileupload');
+app.use(cors());
 
-    // creating employee data using req.body
-    app.post("/createjob", async (req, res) => {
-        let { name, email, password, mobile_no } = req.body;
-        let data = {
-            "name": name,
-            "email": email,
-            "password": password,
-            "mobile_no": mobile_no,
-        }
-        console.log(data);
-        console.log(req.body);
+app.use(fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+}));
 
-        // use to connect to the server        
-        try {
-            await client.connect();
-            let db = client.db(ex);
-            await db.collection('jobs').insertOne(data);
-            res.status(200).json({ "message": "Job Created" })
-        } catch (e) {
-            console.log(e)
-        }
-    })
+// Main database
+const ex = "job_portal";
 
-    // checking for login details of employee from database (2 condition) using req.body() for secure information
-    // postman => body => raw
-    // Type the email and password in postman(json format) in post method then send
-    // so it check both condition if it matches the information to the database it fetch the data from database and list in postman
-    app.post("/joblogin", async (req, res) => {
-        await client.connect();
-        let { email, password } = req.body; // postman url
-        let db = client.db(ex);
-        let list = await db.collection('jobs').find({ "email": email, "password": password }).toArray();
+// URL of the MongoDB database
+const url = 'mongodb+srv://anuj123:jangiranuj2000@cluster0.qq2p4.mongodb.net';
+const client = new MongoClient(url);
 
-        if (list.length > 0) {
-            //res.json({"msg":"You are correct"})
-            //res.status(200).json(list)
-            res.status(200).json({
-                "msg": "Login successful,correct details",
-                "data": list
-            });
-        } else {
-            res.json({ "msg": "Email or password is incorrect" })
-        }
+// Creating job data using req.body
+app.post("/createjob", async (req, res) => {
+    let { email, password } = req.body;
+    let data = { email, password };
 
-    })
-
-    // Using post method
-    app.post('/updatejob', async (req, res) => {
-        let { name, password } = req.body;
+    try {
         await client.connect();
         let db = client.db(ex);
-        await db.collection("jobs").updateOne({ "name": name }, {
-            $set: { "password": password }
-        });
-        res.json({ "message": "Password updated successfully" });
-    })
+        await db.collection('jobs').insertOne(data);
+        res.status(200).json({ "message": "Job Created" });
+    } catch (err) {
+        res.status(500).json({ "message": "Failed to create job", "error": err });
+    } finally {
+        await client.close();
+    }
+});
 
-    // for listing all Job details from mongoDB(Database)
-    app.get("/api/list_job", async (req, res) => {
+// Listing all job details from MongoDB
+app.get("/getjob", async (req, res) => {
+    try {
         await client.connect();
         let db = client.db(ex);
         let list = await db.collection('jobs').find({}).toArray();
-        res.status(200).json(list)
-    });
+        res.status(200).json(list);
+    } catch (err) {
+        res.status(500).json({ "message": "Failed to retrieve jobs", "error": err });
+    } finally {
+        await client.close();
+    }
+});
 
-    // for getting specific employee details from mongoDB(Database)
-    app.get("/listjobbyname/:name", async (req, res) => {   // "/listempbyname/:name" => path variable
-        await client.connect();
-        let { name } = req.params; // postman url
-        let db = client.db(ex);
-        let list = await db.collection('jobs').find({ name: name }).toArray(); //find({name:name}) => mongodb 
-        res.status(200).json(list)
-    })
+// Get job by email (within /api/ routes, protected by token middleware)
+app.get("/api/list_job", async (req, res) => {
+    let { email } = req.query;
 
-    app.get('/updatejobusingget', async (req, res) => {
-        let { id } = req.query;
-        await client.connect();
-        let db = client.db(ex);
-        // we should import Objectid [const { MongoClient, ObjectId } = require('mongodb');] 
-        // This code getting data from mongodb using the objectid() new is a keyword
-        let data = await db.collection("jobs").find({ "_id": new ObjectId(id) }).toArray();
-        res.json(data)
-    })
-
-    app.put("/updatejobbyname", async (req, res) => {
-        let { name, password } = req.query;
+    try {
         await client.connect();
         let db = client.db(ex);
-        await db.collection("jobs").updateOne({ "name": name }, {
-            $set: { "password": password }
-        });
-        res.json({ "msg": "Data updated successfully" })
-    });
+        let list = await db.collection('jobs').find({ email }).toArray();
+        res.status(200).json(list);
+    } catch (err) {
+        res.status(500).json({ "message": "Failed to retrieve job by email", "error": err });
+    } finally {
+        await client.close();
+    }
+});
 
-    app.delete("/deletejobbyname", async (req, res) => {
-        let { name } = req.query;
+// Checking login details of job in the database
+app.post("/joblogin", async (req, res) => {
+    let { email, password } = req.body;
+
+    try {
         await client.connect();
         let db = client.db(ex);
-        await db.collection("jobs").deleteOne({ "name": name })
-        res.json({ "msg": "user deleted" })
-    })
-    app.post("/login", async (req,res)=>{
-        let{email,password}= req.body;
-        //add db connection details
-        let db = client.db(ex);
-        let loginRes = await db.collection("jobs").find({"email":email,"password":password}).toArray();
-        console.log(loginRes);
+        let list = await db.collection('jobs').find({ email, password }).toArray();
 
-        if(loginRes.length > 0){
-            var token = jwt.sign({'name':loginRes[0]['name']},' SECRET');
-            res.json({"msg":"u are correct","token":token});
-        }else{
-            res.json({"msg":"u are wrong"});
+        if (list.length > 0) {
+            var token = jwt.sign({ "name": list[0]['name'] }, 'SECRET');
+            res.json({ "msg": "Login successful", "token": token });
+        } else {
+            res.json({ "msg": "Email or password is incorrect" });
         }
-    });
+    } catch (err) {
+        res.status(500).json({ "message": "Login failed", "error": err });
+    } finally {
+        await client.close();
+    }
+});
 
-    app.delete('/delete_id', async (req, res) => {
-        let { id } = req.body;
-        console.log(id);
+// Delete job by ID
+app.delete("/deletejobbyname", async (req, res) => {
+    let { id } = req.query;
+
+    try {
         await client.connect();
         let db = client.db(ex);
         await db.collection("jobs").deleteOne({ "_id": new ObjectId(id) });
-        res.json({ "msg": "Deleted using Id!" });
+        res.json({ "msg": "Job deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ "msg": "Failed to delete job", "error": err });
+    } finally {
+        await client.close();
+    }
+});
 
+// Update job by email
+app.put("/updatejobbyname", async (req, res) => {
+    let { email, password } = req.query;
+
+    try {
+        await client.connect();
+        let db = client.db(ex);
+        await db.collection("jobs").updateOne({ email }, {
+            $set: { password }
+        });
+        res.json({ "message": "Data updated successfully" });
+    } catch (err) {
+        res.status(500).json({ "msg": "Failed to update job", "error": err });
+    } finally {
+        await client.close();
+    }
+});
+
+// Update job by ID using post method
+app.post('/updatejob', async (req, res) => {
+    let { id, email } = req.body;
+
+    try {
+        await client.connect();
+        let db = client.db(ex);
+        await db.collection("jobs").updateOne({ "_id": new ObjectId(id) }, {
+            $set: { email }
+        });
+        res.json({ "message": "Updated successfully" });
+    } catch (err) {
+        res.status(500).json({ "msg": "Failed to update job", "error": err });
+    } finally {
+        await client.close();
+    }
+});
+
+// Get job by ID using query parameters
+app.get('/updatejobusingget', async (req, res) => {
+    let { id } = req.query;
+
+    try {
+        await client.connect();
+        let db = client.db(ex);
+        let data = await db.collection("jobs").find({ "_id": new ObjectId(id) }).toArray();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ "msg": "Failed to retrieve job", "error": err });
+    } finally {
+        await client.close();
+    }
+});
+
+// File upload method
+app.post('/upload', function (req, res) {
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No files were uploaded.');
+    }
+
+    let file = req.files.img;
+    let uploadPath = __dirname + '/uploads/' + file.name;
+
+    file.mv(uploadPath, function (err) {
+        if (err)
+            return res.status(500).send(err);
+
+        res.send('File uploaded successfully.');
     });
+});
 
-    // Start the Express server 
-    app.listen(8080, () => {
-        console.log("Server is running on port 8080");
-    });
-
-    // req.body => sending the details to server (secure) (json format)
-    // path variable => contain the data in the url so it's not secure (url format)
+// Start the Express server 
+app.listen(8080, () => {
+    console.log("Server is running on port 8080");
+});
